@@ -1,0 +1,11 @@
+.inline-input {
+    align-items: flex-start;
+    border-bottom: 1px dotted #fff;
+    display: flex;
+    margin: .5rem 0 1.5rem 0;
+}
+
+.inline-input:focus-within {
+    border-bottom: 1px dotted #333;
+    transition: all .3s ease-in-out;
+}
