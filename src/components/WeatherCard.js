@@ -4,7 +4,7 @@ import WeatherList from "./WeatherList";
 import SearchForm from "./SearchForm";
 import axios from "axios";
 
-import data from "../JsonData";
+// import data from "../JsonData";
 const API_KEY = "986df41cb8f0c0e4760d17130fc344d7";
 
 const WeatherCard = () => {
@@ -73,10 +73,12 @@ const WeatherCard = () => {
               matching[date] = [value];
             }
           });
-
+          
           // convert to proper array
-          const toArray = Object.entries(matching);
-
+          let toArray = Object.entries(matching);
+          toArray= toArray.filter((e)=>{
+            return (e[1].length !==1)
+          })
           const finalData = [];
 
           toArray.forEach((value) => {

@@ -8,6 +8,7 @@ const WeatherDetails = ({ data, units }) => {
       <div className="weather-image">
         {data.data.low !== undefined && data.data.high === undefined ? (
           <>
+            
             <img
               src={`http://openweathermap.org/img/w/${data.data.low.weather.icon}.png`}
               alt={data.data.low.weather.desciption}
