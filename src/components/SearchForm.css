@@ -3,13 +3,18 @@
     border-bottom: 1px dotted #fff;
     display: flex;
     margin: .5rem 0 1.5rem 0;
+    padding-bottom: 15px;
 }
 
 .inline-input:focus-within {
     border-bottom: 1px dotted #333;
     transition: all .3s ease-in-out;
 }
-input{
+
+input {
     width: 300px;
     height: 30px;
+    border-radius: 3px;
+    border: none;
+    padding: 6px 20px 7px;
 }

@@ -26,6 +26,10 @@ const WeatherCard = () => {
 
   const [weather, setWeather] = useState([]);
 
+  const [showRetry, setShowRetry] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(0);
+
   useEffect(() => {
     const URL = `http://api.openweathermap.org/data/2.5/weather?q=${state.city}&units=metric&appid=${API_KEY}`;
 
@@ -46,14 +50,25 @@ const WeatherCard = () => {
       .catch((error) => {});
   }, [state.city]);
 
-  const loopCall = useCallback(() => {
+  /**
+   * Make API call
+   */
+
+  const makeCall = new Promise((resolve, reject) => {
     const URL = `http://api.openweathermap.org/data/2.5/forecast?q=${state.city}&units=metric&appid=${API_KEY}`;
+
     axios
       .get(URL)
       .then((response) => {
         const { data } = response;
 
+        // Check if we got a good response, which is 200
+
         if (data.cod === "200") {
+          // Don't retry, everything is good
+
+          resolve(false);
+
           const arr = data.list.filter((e) => {
             const val = e.dt_txt.split(" ")[1];
             return val === "00:00:00" || val === "12:00:00";
@@ -73,12 +88,13 @@ const WeatherCard = () => {
               matching[date] = [value];
             }
           });
-          
+
           // convert to proper array
+
           let toArray = Object.entries(matching);
-          toArray= toArray.filter((e)=>{
-            return (e[1].length !==1)
-          })
+          toArray = toArray.filter((e) => {
+            return e[1].length !== 1;
+          });
           const finalData = [];
 
           toArray.forEach((value) => {
@@ -107,13 +123,69 @@ const WeatherCard = () => {
 
           setWeather(finalData);
         } else {
+          // Retry
+
+          resolve(true);
         }
       })
-      .catch((error) => {});
-  }, [state.city]);
+      .catch((error) => {
+        // Retry
+
+        resolve(true);
+      });
+  });
+
+  /**
+   * Exponetially delay re-try periods, until successful
+   *
+   * @param {Function} apiCaller - makes api call
+   * @param {number} delay - a deplay timer for re-retrying
+   */
+
+  const loopCall = useCallback(
+    async (apiCaller, delay) => {
+      const retry = await apiCaller.then((response) => {
+        return response;
+      });
+
+      if (retry) {
+        if (delay <= 16000) {
+          console.log("Next delay", delay);
+          setShowRetry(true);
+
+          setRemainingTime(delay);
+
+          const timer = setTimeout(() => {
+            if (retrying) {
+              setRetrying(false);
+              clearTimeout(timer);
+            } else {
+              loopCall(apiCaller, delay * 2);
+            }
+          }, delay);
+        } else {
+          console.log("Just stop trying.");
+          setShowRetry(false);
+          setRemainingTime(0);
+        }
+      } else {
+        setShowRetry(false);
+        setRemainingTime(0);
+      }
+    },
+    [state.city, retrying]
+  );
+
+  const onRetry = () => {
+    setRetrying(true);
+    setShowRetry(false);
+    makeCall.then((response) => {
+      return response;
+    });
+  };
 
   useEffect(() => {
-    loopCall();
+    loopCall(makeCall, 2000);
   }, [loopCall]);
 
   const onSearchSubmit = (city) => {
@@ -184,8 +256,10 @@ const WeatherCard = () => {
   return (
     <div className="card">
       <SearchForm onSubmit={onSearchSubmit} />
-      <h1>Weekly weather forecast in {state.city}</h1>
-      <form onSubmit={onFormSubmit}>
+      <h1 className="main-card-header">
+        Weekly weather forecast in {state.city}
+      </h1>
+      <div className="options-container">
         <label htmlFor="celsius">
           <input
             onChange={onValueChange}
@@ -194,7 +268,7 @@ const WeatherCard = () => {
             checked={state.tempUnits === "celsius"}
             value="celsius"
           />
-          Celsius
+          <div>Celsius</div>
         </label>
         <label htmlFor="fahrenheit">
           <input
@@ -204,10 +278,9 @@ const WeatherCard = () => {
             checked={state.tempUnits === "fahrenheit"}
             value="fahrenheit"
           />
-          Fahrenheit
+          <div>Fahrenheit</div>
         </label>
-      </form>
-
+      </div>
       <div className="currentWeather">
         <div className="main-info">
           <div className="temp-measurement">{currentWeather.mainTemp}</div>
@@ -235,6 +308,14 @@ const WeatherCard = () => {
       </div>
 
       <WeatherList weather={weather} units={state.tempSymbol} />
+      {showRetry && (
+        <div className="retry-container">
+          <button className="retry-btn" onClick={onRetry}>
+            Retry now
+          </button>
+          <div>{`Retrying in ${remainingTime / 1000} sec.`}</div>
+        </div>
+      )}
     </div>
   );
 };
