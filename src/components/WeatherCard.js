@@ -48,7 +48,6 @@ const WeatherCard = () => {
             max: Math.round(data.main.temp_max),
           },
         });
-        
       })
       .catch((error) => {});
   }, [state.city]);
@@ -249,11 +248,6 @@ const WeatherCard = () => {
     setWeather(changeWeather);
 
     setState({ ...state, tempSymbol: symbol, tempUnits: value });
-  };
-
-  const onFormSubmit = (e) => {
-    e.preventDefault();
-    console.log(state.tempUnits);
   };
 
   return (
