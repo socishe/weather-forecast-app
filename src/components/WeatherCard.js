@@ -10,17 +10,17 @@ const API_KEY = "986df41cb8f0c0e4760d17130fc344d7";
 const WeatherCard = () => {
   const [state, setState] = useState({
     city: "Cape Town",
-    temp: 20,
     tempUnits: "celsius",
+    tempSymbol: "°C",
   });
 
   const [currentWeather, setCurrentWeather] = useState({
     icon: "",
     main: "",
-    mainTemp: "",
+    mainTemp: 0,
     temp: {
-      min: "",
-      max: "",
+      min: 0,
+      max: 0,
     },
   });
 
@@ -36,15 +36,15 @@ const WeatherCard = () => {
         setCurrentWeather({
           icon: data.weather[0].icon,
           main: data.weather[0].main,
-          mainTemp: data.main.temp,
+          mainTemp: Math.round(data.main.temp),
           temp: {
-            min: data.main.temp_min,
-            max: data.main.temp_max,
+            min: Math.round(data.main.temp_min),
+            max: Math.round(data.main.temp_max),
           },
         });
       })
       .catch((error) => {});
-  }, []);
+  }, [state.city]);
 
   const loopCall = useCallback(() => {
     const URL = `http://api.openweathermap.org/data/2.5/forecast?q=${state.city}&units=metric&appid=${API_KEY}`;
@@ -86,7 +86,7 @@ const WeatherCard = () => {
               const time = itemValue.dt_txt.split(" ")[1];
 
               const dataCons = {
-                temp: itemValue.main.temp,
+                temp: Math.round(itemValue.main.temp),
                 weather: itemValue.weather[0],
               };
 
@@ -117,18 +117,60 @@ const WeatherCard = () => {
   const onSearchSubmit = (city) => {
     setState({ city });
   };
-  // toCelsius =fahrenheit=>{
-  //     return (Math.round)
-  // }
+
+  const toCelsius = (fahrenheit) => {
+    return Math.round(((fahrenheit - 32) * 5) / 9);
+  };
+
   const toFahrenheit = (celsius) => {
     return Math.round((celsius * 9) / 5 + 32);
   };
 
+  const converter = (temp, type) => {
+    if (type !== "celsius") {
+      return toFahrenheit(temp);
+    }
+
+    return toCelsius(temp);
+  };
+
   const onValueChange = (e) => {
-    setState({ tempUnits: e.target.value });
-    // if(e.target.value ==="fahrenheit"){
-    //     newTemp =
-    // }
+    const value = e.target.value;
+    let symbol = "°C";
+
+    if (value !== "celsius") {
+      symbol = "°F";
+    }
+
+    const calCurrent = {
+      icon: currentWeather.icon,
+      main: currentWeather.main,
+      mainTemp: converter(currentWeather.mainTemp, value),
+      temp: {
+        min: converter(currentWeather.temp.min, value),
+        max: converter(currentWeather.temp.max, value),
+      },
+    };
+
+    setCurrentWeather(calCurrent);
+
+    const changeWeather = weather.map((value) => {
+      const val = value;
+
+      if (val.data.high !== undefined) {
+        val.data.high.temp = converter(val.data.high.temp, value);
+      }
+
+      if (val.data.low !== undefined) {
+        val.data.low.temp = converter(val.data.low.temp, value);
+      }
+
+      return val;
+    });
+
+    setWeather(changeWeather);
+
+    setState({ ...state, tempSymbol: symbol, tempUnits: value });
   };
 
   const onFormSubmit = (e) => {
@@ -165,33 +207,31 @@ const WeatherCard = () => {
 
       <div className="currentWeather">
         <div className="main-info">
-          <div className="temp-measurement">{state.temp}</div>
-          <div className="temp-unit">°C</div>
+          <div className="temp-measurement">{currentWeather.mainTemp}</div>
+          <div className="temp-unit">
+            {state.tempUnits === "celsius" ? "°C" : "°F"}
+          </div>
         </div>
 
         <div className="sub-info">
           <div className="sub-info-title">Current Weather Today</div>
 
-          <div className="sub-info-text">Sunny</div>
+          <div className="sub-info-text">{currentWeather.main}</div>
 
           <div className="sub-info-text">
             <span className="max-temp">
               <i className="mdi mdi-arrow-up" />
-              {30}
-              °C
+              {`${currentWeather.temp.max} ${state.tempSymbol}`}
             </span>
             <span className="min-temp">
               <i className="mdi mdi-arrow-down" />
-              {13}
-              °C
+              {`${currentWeather.temp.min} ${state.tempSymbol}`}
             </span>
           </div>
         </div>
       </div>
 
-      {/* <div className="currentWeather"> Current temperatures in {state.city}</div> */}
-
-      <WeatherList weather={weather} units={state.tempUnits} />
+      <WeatherList weather={weather} units={state.tempSymbol} />
     </div>
   );
 };

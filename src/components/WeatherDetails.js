@@ -1,7 +1,7 @@
 import React from "react";
 import "./WeatherDetails.css";
 
-const WeatherDetails = ({ data }) => {
+const WeatherDetails = ({ data, units }) => {
   return (
     <div className="main-display">
       <h1 className="date">{data.date}</h1>
@@ -24,12 +24,12 @@ const WeatherDetails = ({ data }) => {
       </div>
       <div className="temeratures">
         {data.data.low !== undefined && (
-          <>Min: {Math.round(data.data.low.temp)} °C</>
+          <>Min: {`${data.data.low.temp} ${units}`}</>
         )}
       </div>
       <div className="temeratures">
         {data.data.high !== undefined && (
-          <>Max: {Math.round(data.data.high.temp)} °C</>
+          <>Max: {`${data.data.high.temp} ${units}`}</>
         )}
       </div>
     </div>

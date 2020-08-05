@@ -1,13 +1,7 @@
-
-
 .App {
-  height: 100vh;
-  transition: all .3s ease-in-out;
-  width: 100vw;
+    height: 100vh;
+    transition: all .3s ease-in-out;
 }
-
-
-
 
 .inline-input .mdi {
     color: #fff;
@@ -73,7 +67,7 @@
 }
 
 .sub-info-text .max-temp {
-/*     font-weight: 700; */
+    /*     font-weight: 700; */
     margin: 0 .5rem 0 -.1rem;
 }
 
