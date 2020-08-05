@@ -223,11 +223,11 @@ const WeatherCard = () => {
           <div className="sub-info-text">
             <span className="max-temp">
               <i className="mdi mdi-arrow-up" />
-              {`${currentWeather.temp.max} ${state.tempSymbol}`}
+              {`${currentWeather.temp.min} ${state.tempSymbol}`}
             </span>
             <span className="min-temp">
               <i className="mdi mdi-arrow-down" />
-              {`${currentWeather.temp.min} ${state.tempSymbol}`}
+              {`${currentWeather.temp.max} ${state.tempSymbol}`}
             </span>
           </div>
         </div>
