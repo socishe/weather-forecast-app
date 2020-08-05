@@ -17,16 +17,6 @@
     font-size: 0.9rem;
     /* text-align: end; */
 }
-
-.weather-image {
-	display: flex;
-	justify-content: flex-start;
-	align-items: center;
-	/* height: 250px;
-	background-color: #eceff1; */
-	border-radius: 3px;
-	margin-bottom: 1rem;
-}
 .main-display  img {
 	transition: all ease 500ms;
 }
