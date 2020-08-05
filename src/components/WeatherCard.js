@@ -18,6 +18,7 @@ const WeatherCard = () => {
     icon: "",
     main: "",
     mainTemp: 0,
+    time: "",
     temp: {
       min: 0,
       max: 0,
@@ -36,12 +37,14 @@ const WeatherCard = () => {
         setCurrentWeather({
           icon: data.weather[0].icon,
           main: data.weather[0].main,
+          time: data.timezone,
           mainTemp: Math.round(data.main.temp),
           temp: {
             min: Math.round(data.main.temp_min),
             max: Math.round(data.main.temp_max),
           },
         });
+        
       })
       .catch((error) => {});
   }, [state.city]);
@@ -184,6 +187,7 @@ const WeatherCard = () => {
   return (
     <div className="card">
       <SearchForm onSubmit={onSearchSubmit} />
+      
       <h1>Weekly weather forecast in {state.city}</h1>
       <form onSubmit={onFormSubmit}>
         <label htmlFor="celsius">
@@ -215,9 +219,8 @@ const WeatherCard = () => {
             {state.tempUnits === "celsius" ? "°C" : "°F"}
           </div>
         </div>
-
         <div className="sub-info">
-          <div className="sub-info-title">Current Weather Today</div>
+          <div className="sub-info-datatitle">Current Weather Today</div>
 
           <div className="sub-info-text">{currentWeather.main}</div>
 
