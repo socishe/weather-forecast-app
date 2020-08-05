@@ -1,19 +1,22 @@
-import React from 'react';
-import WeatherDetails from './WeatherDetails';
+import React from "react";
+import WeatherDetails from "./WeatherDetails";
 
-const WeatherList =(props) =>{
-    if(!props.weather){
-        return <div>Loading!</div>
-    }
-    const weatherItems = props.weather.map(data =>{
-        return <WeatherDetails data={data} key={data.dt} units={props.units}/>
-    })
-    return(
-        <div>
-            <ol className="col-md-4 list-group">
-            {weatherItems}
-            </ol>
-        </div>
-    );
-}
+const WeatherList = (props) => {
+  const { weather, units } = props;
+
+  return (
+    <div>
+      {weather.length === 0 ? (
+        <div>Loading!</div>
+      ) : (
+        <ol className="col-md-4 list-group">
+          {weather.map((data) => {
+            return <WeatherDetails data={data} key={data.date} units={units} />;
+          })}
+        </ol>
+      )}
+    </div>
+  );
+};
+
 export default WeatherList;
