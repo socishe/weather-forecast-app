@@ -32,30 +32,32 @@ const WeatherCard = () => {
   const [remainingTime, setRemainingTime] = useState(0);
 
   useEffect(() => {
-    const keepCalling =()=>{
+    const keepCalling = () => {
+      const URL = `http://api.openweathermap.org/data/2.5/weather?q=${state.city}&units=metric&appid=${API_KEY}`;
 
-    }
-    const URL = `http://api.openweathermap.org/data/2.5/weather?q=${state.city}&units=metric&appid=${API_KEY}`;
+      axios
+        .get(URL)
+        .then((response) => {
+          const { data } = response;
+          setCurrentWeather({
+            icon: data.weather[0].icon,
+            main: data.weather[0].main,
+            time: data.timezone,
+            mainTemp: Math.round(data.main.temp),
+            temp: {
+              min: Math.round(data.main.temp_min),
+              max: Math.round(data.main.temp_max),
+            },
+          });
 
-    axios
-      .get(URL)
-      .then((response) => {
-        const { data } = response;
-        setCurrentWeather({
-          icon: data.weather[0].icon,
-          main: data.weather[0].main,
-          time: data.timezone,
-          mainTemp: Math.round(data.main.temp),
-          temp: {
-            min: Math.round(data.main.temp_min),
-            max: Math.round(data.main.temp_max),
-          },
-        });
-        setTimeout(()=>{
-          keepCalling()
-        }, 1200000)
-      })
-      .catch((error) => {});
+          setTimeout(() => {
+            keepCalling();
+          }, 1200000); // 20min
+        })
+        .catch(() => {});
+    };
+
+    keepCalling();
   }, [state.city]);
 
   /**
@@ -181,7 +183,7 @@ const WeatherCard = () => {
         setRemainingTime(0);
       }
     },
-    [state.city, retrying]
+    [retrying]
   );
 
   const onRetry = () => {
@@ -194,7 +196,7 @@ const WeatherCard = () => {
 
   useEffect(() => {
     loopCall(makeCall, 2000);
-  }, [loopCall]);
+  }, [makeCall, loopCall]);
 
   const onSearchSubmit = (city) => {
     setState({ city });
