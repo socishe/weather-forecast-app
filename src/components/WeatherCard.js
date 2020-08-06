@@ -220,7 +220,7 @@ const WeatherCard = () => {
 
   const onValueChange = (e) => {
     const value = e.target.value;
-    console.log(value);
+
     let symbol = "°C";
 
     if (value !== "celsius") {
