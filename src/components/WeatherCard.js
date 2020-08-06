@@ -18,7 +18,7 @@ const WeatherCard = () => {
     icon: "",
     main: "",
     mainTemp: 0,
-    time: "",
+    timezone: "",
     temp: {
       min: 0,
       max: 0,
@@ -44,7 +44,7 @@ const WeatherCard = () => {
         setCurrentWeather({
           icon: data.weather[0].icon,
           main: data.weather[0].main,
-          time: data.timezone,
+          timezone: data.timezone,
           mainTemp: Math.round(data.main.temp),
           temp: {
             min: Math.round(data.main.temp_min),
@@ -224,7 +224,17 @@ const WeatherCard = () => {
     if (value !== "celsius") {
       symbol = "°F";
     }
-
+    // const calcTime =()=>{
+      // let date = new Date();
+      // const localTime = date.getTime();
+      // const localOffset = date.getTimeZoneOffset() * 60000;
+      // const uct = localTime + localOffset;
+      // var remoteTime = uct + (1000 + currentWeather.timezone);
+      // console.log(remoteTime); 
+    //  const timezone = currentWeather.time;
+    //  const timezoneInMinutes = timezone/60;
+    //  const currentTime; 
+    // };
     const calCurrent = {
       icon: currentWeather.icon,
       main: currentWeather.main,
@@ -255,7 +265,7 @@ const WeatherCard = () => {
 
     setState({ ...state, tempSymbol: symbol, tempUnits: value });
   };
-
+  
   return (
     <div className="card">
       <SearchForm onSubmit={onSearchSubmit} />
