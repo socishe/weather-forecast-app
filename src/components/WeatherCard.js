@@ -216,7 +216,7 @@ const WeatherCard = () => {
   };
 
   const toFahrenheit = (celsius) => {
-    return Math.round((celsius * (9 / 5)) + 32);
+    return Math.round(celsius * (9 / 5) + 32);
   };
 
   const converter = (temp, type) => {
@@ -255,7 +255,8 @@ const WeatherCard = () => {
     /**
      * Convert weather array data
      * @var array
-     */console.log(weather)
+     */
+
     const changeWeather = weather.map((objValue) => {
       const val = objValue;
 
@@ -269,7 +270,6 @@ const WeatherCard = () => {
 
       return val;
     });
-    console.log(changeWeather)
 
     setWeather(changeWeather);
 
