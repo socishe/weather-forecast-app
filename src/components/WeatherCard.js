@@ -35,7 +35,7 @@ const WeatherCard = () => {
     const keepCalling =()=>{
 
     }
-    const URL = `http://api.openweathermap.org/data/2.5/weather?q=${state.city}&units=metric&appid=${API_KEY}`;
+    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${state.city}&units=metric&appid=${API_KEY}`;
 
     axios
       .get(URL)
@@ -63,7 +63,7 @@ const WeatherCard = () => {
    */
 
   const makeCall = new Promise((resolve, reject) => {
-    const URL = `http://api.openweathermap.org/data/2.5/forecast?q=${state.city}&units=metric&appid=${API_KEY}`;
+    const URL = `https://api.openweathermap.org/data/2.5/forecast?q=${state.city}&units=metric&appid=${API_KEY}`;
 
     axios
       .get(URL)
