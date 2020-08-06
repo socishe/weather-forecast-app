@@ -32,6 +32,9 @@ const WeatherCard = () => {
   const [remainingTime, setRemainingTime] = useState(0);
 
   useEffect(() => {
+    const keepCalling =()=>{
+
+    }
     const URL = `http://api.openweathermap.org/data/2.5/weather?q=${state.city}&units=metric&appid=${API_KEY}`;
 
     axios
@@ -48,6 +51,9 @@ const WeatherCard = () => {
             max: Math.round(data.main.temp_max),
           },
         });
+        setTimeout(()=>{
+          keepCalling()
+        }, 1200000)
       })
       .catch((error) => {});
   }, [state.city]);
