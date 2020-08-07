@@ -33,6 +33,24 @@ const WeatherCard = () => {
   const [retrying, setRetrying] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
 
+  /**
+   * Change to current timezone
+   */
+  const calcTime = (timezone) => {
+    const date = new Date();
+    const localTime = date.getTime();
+
+    const localOffset = date.getTimezoneOffset() * 60000;
+    const uct = localTime + localOffset;
+    const remoteTime = uct + (1000 + timezone);
+
+    const shiftedTimezone = new Date(remoteTime);
+
+    return (
+      shiftedTimezone.toDateString() + ", " + shiftedTimezone.toTimeString()
+    );
+  };
+
   useEffect(() => {
     const keepCalling = () => {
       const URL = `https://api.openweathermap.org/data/2.5/weather?q=${state.city}&units=metric&appid=${API_KEY}`;
@@ -41,10 +59,11 @@ const WeatherCard = () => {
         .get(URL)
         .then((response) => {
           const { data } = response;
+
           setCurrentWeather({
             icon: data.weather[0].icon,
             main: data.weather[0].main,
-            time: data.timezone,
+            timezone: calcTime(data.timezone),
             mainTemp: Math.round(data.main.temp),
             temp: {
               min: Math.round(data.main.temp_min),
@@ -239,20 +258,6 @@ const WeatherCard = () => {
     if (value !== "celsius") {
       symbol = "°F";
     }
-    // const handlAlert =()=>{
-
-    // };
-    // const calcTime =()=>{
-    // let date = new Date();
-    // const localTime = date.getTime();
-    // const localOffset = date.getTimeZoneOffset() * 60000;
-    // const uct = localTime + localOffset;
-    // var remoteTime = uct + (1000 + currentWeather.timezone);
-    // console.log(remoteTime);
-    //  const timezone = currentWeather.time;
-    //  const timezoneInMinutes = timezone/60;
-    //  const currentTime;
-    // };
 
     /**
      * Convert current weather
@@ -262,6 +267,7 @@ const WeatherCard = () => {
       icon: currentWeather.icon,
       main: currentWeather.main,
       mainTemp: converter(currentWeather.mainTemp, value),
+      timezone: currentWeather.timezone,
       temp: {
         min: converter(currentWeather.temp.min, value),
         max: converter(currentWeather.temp.max, value),
@@ -330,7 +336,9 @@ const WeatherCard = () => {
           </div>
         </div>
         <div className="sub-info">
-          <div className="sub-info-datatitle">Current Weather Today</div>
+          <div className="sub-info-datatitle">
+            Current Weather Today, {currentWeather.timezone}
+          </div>
 
           <div className="sub-info-text">{currentWeather.main}</div>
 
