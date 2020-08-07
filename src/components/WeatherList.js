@@ -2,12 +2,12 @@ import React from "react";
 import WeatherDetails from "./WeatherDetails";
 
 const WeatherList = (props) => {
-  const { weather, units } = props;
+  const { weather, units, error } = props;
 
   return (
     <>
       {weather.length === 0 ? (
-        <div>Loading!</div>
+        <div>{!error ? "Loading!" : "Failed to load"}</div>
       ) : (
         <div className="list-group">
           {weather.map((data) => {

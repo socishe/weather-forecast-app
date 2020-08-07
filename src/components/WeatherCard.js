@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./WeatherCard.css";
 import WeatherList from "./WeatherList";
 import SearchForm from "./SearchForm";
 import axios from "axios";
 
 // import data from "../JsonData";
-const API_KEY = "986df41cb8f0c0e4760d17130fc344d7"; //eb80319cc0ba7476262441a8f6e357a
+const API_KEY = "87c4d0766e312391d63eb4c67ad58131";
 
 const WeatherCard = () => {
   const [state, setState] = useState({
@@ -28,120 +28,128 @@ const WeatherCard = () => {
   const [weather, setWeather] = useState([]);
 
   const [showRetry, setShowRetry] = useState(false);
+  const [error, setError] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
 
   useEffect(() => {
-    const keepCalling =()=>{
+    const keepCalling = () => {
+      const URL = `https://api.openweathermap.org/data/2.5/weather?q=${state.city}&units=metric&appid=${API_KEY}`;
 
-    }
-    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${state.city}&units=metric&appid=${API_KEY}`;
+      axios
+        .get(URL)
+        .then((response) => {
+          const { data } = response;
+          setCurrentWeather({
+            icon: data.weather[0].icon,
+            main: data.weather[0].main,
+            time: data.timezone,
+            mainTemp: Math.round(data.main.temp),
+            temp: {
+              min: Math.round(data.main.temp_min),
+              max: Math.round(data.main.temp_max),
+            },
+          });
 
-    axios
-      .get(URL)
-      .then((response) => {
-        const { data } = response;
-        setCurrentWeather({
-          icon: data.weather[0].icon,
-          main: data.weather[0].main,
-          timezone: data.timezone,
-          mainTemp: Math.round(data.main.temp),
-          temp: {
-            min: Math.round(data.main.temp_min),
-            max: Math.round(data.main.temp_max),
-          },
-        });
-        setTimeout(()=>{
-          keepCalling()
-        }, 1200000)
-      })
-      .catch((error) => {});
+          setTimeout(() => {
+            keepCalling();
+          }, 1200000); // 20min
+        })
+        .catch(() => {});
+    };
+
+    keepCalling();
   }, [state.city]);
 
   /**
    * Make API call
    */
+  const makeCall = () => {
+    return new Promise((resolve, reject) => {
+      const URL = `https://api.openweathermap.org/data/2.5/forecast?q=${state.city}&units=metric&appid=${API_KEY}`;
 
-  const makeCall = new Promise((resolve, reject) => {
-    const URL = `https://api.openweathermap.org/data/2.5/forecast?q=${state.city}&units=metric&appid=${API_KEY}`;
+      axios
+        .get(URL)
+        .then((response) => {
+          const { data } = response;
 
-    axios
-      .get(URL)
-      .then((response) => {
-        const { data } = response;
+          // Check if we got a good response, which is 200
 
-        // Check if we got a good response, which is 200
+          if (data.cod === "200") {
+            // Don't retry, everything is good
 
-        if (data.cod === "200") {
-          // Don't retry, everything is good
+            resolve(false);
 
-          resolve(false);
+            const arr = data.list.filter((e) => {
+              const val = e.dt_txt.split(" ")[1];
+              return val === "00:00:00" || val === "12:00:00";
+            });
 
-          const arr = data.list.filter((e) => {
-            const val = e.dt_txt.split(" ")[1];
-            return val === "00:00:00" || val === "12:00:00";
-          });
+            // Sort data according matching days
 
-          // Sort data according matching days
+            const matching = [];
 
-          const matching = [];
+            arr.forEach((value) => {
+              // take date
+              const date = value.dt_txt.split(" ")[0];
 
-          arr.forEach((value) => {
-            // take date
-            const date = value.dt_txt.split(" ")[0];
-
-            if (matching[date]) {
-              matching[date].push(value);
-            } else {
-              matching[date] = [value];
-            }
-          });
-
-          // convert to proper array
-
-          let toArray = Object.entries(matching);
-          toArray = toArray.filter((e) => {
-            return e[1].length !== 1;
-          });
-          const finalData = [];
-
-          toArray.forEach((value) => {
-            const itemData = {};
-
-            value[1].forEach((itemValue) => {
-              const time = itemValue.dt_txt.split(" ")[1];
-
-              const dataCons = {
-                temp: Math.round(itemValue.main.temp),
-                weather: itemValue.weather[0],
-              };
-
-              if (time === "12:00:00") {
-                itemData["high"] = dataCons;
+              if (matching[date]) {
+                matching[date].push(value);
               } else {
-                itemData["low"] = dataCons;
+                matching[date] = [value];
               }
             });
 
-            finalData.push({
-              date: value[0],
-              data: itemData,
-            });
-          });
+            // convert to proper array
 
-          setWeather(finalData);
-        } else {
+            let toArray = Object.entries(matching);
+            toArray = toArray.filter((e) => {
+              return e[1].length !== 1;
+            });
+
+            const finalData = [];
+
+            toArray.forEach((value) => {
+              const itemData = {};
+
+              value[1].forEach((itemValue) => {
+                const time = itemValue.dt_txt.split(" ")[1];
+
+                const roundTemp = Math.round(itemValue.main.temp);
+
+                const dataCons = {
+                  temp: roundTemp,
+                  mainTemp: roundTemp,
+                  weather: itemValue.weather[0],
+                };
+
+                if (time === "12:00:00") {
+                  itemData["high"] = dataCons;
+                } else {
+                  itemData["low"] = dataCons;
+                }
+              });
+
+              finalData.push({
+                date: value[0],
+                data: itemData,
+              });
+            });
+
+            setWeather(finalData);
+          } else {
+            // Retry
+
+            resolve(true);
+          }
+        })
+        .catch((error) => {
           // Retry
 
           resolve(true);
-        }
-      })
-      .catch((error) => {
-        // Retry
-
-        resolve(true);
-      });
-  });
+        });
+    });
+  };
 
   /**
    * Exponetially delay re-try periods, until successful
@@ -152,13 +160,14 @@ const WeatherCard = () => {
 
   const loopCall = useCallback(
     async (apiCaller, delay) => {
-      const retry = await apiCaller.then((response) => {
+      const retry = await apiCaller().then((response) => {
         return response;
       });
 
       if (retry) {
         if (delay <= 16000) {
           console.log("Next delay", delay);
+
           setShowRetry(true);
 
           setRemainingTime(delay);
@@ -173,6 +182,7 @@ const WeatherCard = () => {
           }, delay);
         } else {
           console.log("Just stop trying.");
+          setError(true);
           setShowRetry(false);
           setRemainingTime(0);
         }
@@ -181,13 +191,14 @@ const WeatherCard = () => {
         setRemainingTime(0);
       }
     },
-    [state.city, retrying]
+    [retrying]
   );
 
   const onRetry = () => {
     setRetrying(true);
     setShowRetry(false);
-    makeCall.then((response) => {
+
+    makeCall().then((response) => {
       return response;
     });
   };
@@ -201,11 +212,11 @@ const WeatherCard = () => {
   };
 
   const toCelsius = (fahrenheit) => {
-    return Math.round(((fahrenheit - 32) * 5) / 9);
+    return Math.round((fahrenheit - 32) * (5 / 9));
   };
 
   const toFahrenheit = (celsius) => {
-    return Math.round((celsius * 9) / 5 + 32);
+    return Math.round(celsius * (9 / 5) + 32);
   };
 
   const converter = (temp, type) => {
@@ -218,7 +229,7 @@ const WeatherCard = () => {
 
   const onValueChange = (e) => {
     const value = e.target.value;
-    console.log(value);
+
     let symbol = "°C";
 
     if (value !== "celsius") {
@@ -235,6 +246,11 @@ const WeatherCard = () => {
     //  const timezoneInMinutes = timezone/60;
     //  const currentTime; 
     // };
+
+    /**
+     * Convert current weather
+     * @var Object
+     */
     const calCurrent = {
       icon: currentWeather.icon,
       main: currentWeather.main,
@@ -247,8 +263,13 @@ const WeatherCard = () => {
 
     setCurrentWeather(calCurrent);
 
-    const changeWeather = weather.map((value) => {
-      const val = value;
+    /**
+     * Convert weather array data
+     * @var array
+     */
+
+    const changeWeather = weather.map((objValue) => {
+      const val = objValue;
 
       if (val.data.high !== undefined) {
         val.data.high.temp = converter(val.data.high.temp, value);
@@ -319,7 +340,11 @@ const WeatherCard = () => {
         </div>
       </div>
 
-      <WeatherList weather={weather} units={state.tempSymbol} />
+      <WeatherList
+        error={error && !showRetry}
+        weather={weather}
+        units={state.tempSymbol}
+      />
       {showRetry && (
         <div className="retry-container">
           <button className="retry-btn" onClick={onRetry}>
