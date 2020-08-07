@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./WeatherCard.css";
 import WeatherList from "./WeatherList";
 import SearchForm from "./SearchForm";
@@ -65,7 +65,7 @@ const WeatherCard = () => {
   /**
    * Make API call
    */
-  const makeCall = () => {
+  const makeCall = useCallback(() => {
     return new Promise((resolve, reject) => {
       const URL = `https://api.openweathermap.org/data/2.5/forecast?q=${state.city}&units=metric&appid=${API_KEY}`;
 
@@ -150,7 +150,7 @@ const WeatherCard = () => {
           resolve(true);
         });
     });
-  };
+  }, [state.city]);
 
   /**
    * Exponetially delay re-try periods, until successful
@@ -206,7 +206,8 @@ const WeatherCard = () => {
 
   useEffect(() => {
     loopCall(makeCall, 2000);
-  }, [loopCall, state.city]);
+  }, [loopCall, state.city, makeCall]);
+ 
 
   const onSearchSubmit = (city) => {
     setState({ city, tempUnits: "celsius", tempSymbol: "°C" });
@@ -242,15 +243,15 @@ const WeatherCard = () => {
 
     // };
     // const calcTime =()=>{
-      // let date = new Date();
-      // const localTime = date.getTime();
-      // const localOffset = date.getTimeZoneOffset() * 60000;
-      // const uct = localTime + localOffset;
-      // var remoteTime = uct + (1000 + currentWeather.timezone);
-      // console.log(remoteTime); 
+    // let date = new Date();
+    // const localTime = date.getTime();
+    // const localOffset = date.getTimeZoneOffset() * 60000;
+    // const uct = localTime + localOffset;
+    // var remoteTime = uct + (1000 + currentWeather.timezone);
+    // console.log(remoteTime);
     //  const timezone = currentWeather.time;
     //  const timezoneInMinutes = timezone/60;
-    //  const currentTime; 
+    //  const currentTime;
     // };
 
     /**
@@ -292,7 +293,7 @@ const WeatherCard = () => {
 
     setState({ ...state, tempSymbol: symbol, tempUnits: value });
   };
-  
+
   return (
     <div className="card">
       <SearchForm onSubmit={onSearchSubmit} />
