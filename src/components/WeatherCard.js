@@ -5,7 +5,7 @@ import SearchForm from "./SearchForm";
 import axios from "axios";
 
 // import data from "../JsonData";
-const API_KEY = "986df41cb8f0c0e4760d17130fc344d7";
+const API_KEY = "986df41cb8f0c0e4760d17130fc344d7"; //eb80319cc0ba7476262441a8f6e357a
 
 const WeatherCard = () => {
   const [state, setState] = useState({
