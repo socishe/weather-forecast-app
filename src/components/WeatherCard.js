@@ -17,6 +17,7 @@ const WeatherCard = () => {
   const [currentWeather, setCurrentWeather] = useState({
     icon: "",
     main: "",
+    tempUnits: "celsius",
     mainTemp: 0,
     timezone: "",
     temp: {
@@ -205,10 +206,12 @@ const WeatherCard = () => {
 
   useEffect(() => {
     loopCall(makeCall, 2000);
-  }, [loopCall]);
+  }, [loopCall, state.city]);
 
   const onSearchSubmit = (city) => {
-    setState({ city });
+    setState({ city, tempUnits: "celsius", tempSymbol: "°C" });
+    // setCurrentWeather({ city, tempSymbol: "°C" });
+    // setCurrentWeather
   };
 
   const toCelsius = (fahrenheit) => {
@@ -235,6 +238,9 @@ const WeatherCard = () => {
     if (value !== "celsius") {
       symbol = "°F";
     }
+    // const handlAlert =()=>{
+
+    // };
     // const calcTime =()=>{
       // let date = new Date();
       // const localTime = date.getTime();
