@@ -42,12 +42,11 @@ const WeatherCard = () => {
 
     const localOffset = date.getTimezoneOffset() * 60000;
     const uct = localTime + localOffset;
-    const remoteTime = uct + (1000 + timezone);
+    const remoteTime = uct + (1000 * timezone);
 
     const shiftedTimezone = new Date(remoteTime);
-
     return (
-      shiftedTimezone.toDateString() + ", " + shiftedTimezone.toTimeString()
+      shiftedTimezone.toDateString() + " at " + shiftedTimezone.toTimeString().split(" ")[0]
     );
   };
 
